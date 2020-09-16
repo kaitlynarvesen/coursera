@@ -67,6 +67,21 @@ PNG grayscale(PNG image) {
  * @return The image with a spotlight.
  */
 PNG createSpotlight(PNG image, int centerX, int centerY) {
+  for (unsigned x = 0; x < image.width(); x++) {
+    for (unsigned y = 0; y < image.height(); y++) {
+      HSLAPixel & pixel = image.getPixel(x, y);
+      // find distance from center
+      double dx = std::abs((double)(x - centerX));
+      double dy = std::abs((double)(y - centerY));
+      double distance = sqrt(dx*dx + dy*dy);
+      if (distance < 160) {
+        pixel.l = pixel.l * (1 - 0.005 * distance);
+      }
+      else {
+        pixel.l = pixel.l * 0.2;
+      }
+    }
+  }
 
   return image;
   
@@ -84,6 +99,19 @@ PNG createSpotlight(PNG image, int centerX, int centerY) {
  * @return The illinify'd image.
 **/
 PNG illinify(PNG image) {
+  for (unsigned x = 0; x < image.width(); x++) {
+    for (unsigned y = 0; y < image.height(); y++) {
+      HSLAPixel & pixel = image.getPixel(x, y);
+      // find the closest of the two hues
+      double originalHue = pixel.h;
+      if (originalHue < 113.5 || originalHue > 293.5) {
+        pixel.h = 11;
+      }
+      else {
+        pixel.h = 216;
+      }
+    }
+  }
 
   return image;
 }
@@ -102,6 +130,17 @@ PNG illinify(PNG image) {
 * @return The watermarked image.
 */
 PNG watermark(PNG firstImage, PNG secondImage) {
+  for (unsigned x = 0; x < firstImage.width(); x++) {
+    for (unsigned y = 0; y < firstImage.height(); y++) {
+      HSLAPixel & pixelOriginal = firstImage.getPixel(x, y);
+      HSLAPixel & pixelStencil = secondImage.getPixel(x, y);
+      if (pixelStencil.l == 1) {
+        double newL = pixelOriginal.l + 0.2;
+        if (newL > 1) newL = 1;
+        pixelOriginal.l = newL;
+      }
+    }
+  }
 
   return firstImage;
 }
